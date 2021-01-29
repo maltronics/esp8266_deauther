@@ -154,7 +154,7 @@ namespace settings {
         data.attack.beacon_interval       = beacon_interval_t::INTERVAL_100MS;
         data.attack.probe_frames_per_ssid = PROBE_FRAMES_PER_SSID;
 
-        data.wifi.channel = 1;
+        data.wifi.channel = 7;
         getRandomMac(data.wifi.mac_st);
         getRandomMac(data.wifi.mac_ap);
 
