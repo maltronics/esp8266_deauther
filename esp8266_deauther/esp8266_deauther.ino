@@ -185,7 +185,7 @@ void loop() {
     }
 
     resetButton->update();
-    if (resetButton->holding(5000)) {
+    if (resetButton->clicked()) {
         led::setMode(LED_MODE::SCAN);
         DISPLAY_MODE _mode = displayUI.mode;
         displayUI.mode = DISPLAY_MODE::RESETTING;
