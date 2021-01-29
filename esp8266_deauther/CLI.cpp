@@ -285,7 +285,6 @@ void CLI::runCommand(String input) {
         prntln(CLI_HELP_SEND_PROBE);
         prntln(CLI_HELP_LED_A);
         prntln(CLI_HELP_LED_B);
-        prntln(CLI_HELP_LED_ENABLE);
         prntln(CLI_HELP_DRAW);
         prntln(CLI_HELP_SCREEN_ON);
         prntln(CLI_HELP_SCREEN_MODE);
@@ -1080,12 +1079,27 @@ void CLI::runCommand(String input) {
         for (int i = 0; i < packetSize; i++) packet[i] = strtoul((packetStr.substring(i * 2,
                                                                                       i * 2 + 2)).c_str(), NULL, 16);
 
-        if (attack.sendPacket(packet, packetSize, wifi_channel, 10)) {
+        if (attack.sendPacket(packet, packetSize, wifi_channel, true)) {
             prntln(CLI_CUSTOM_SENT);
             counter++;
         } else {
             prntln(CLI_CUSTOM_FAILED);
         }
+    }
+
+    // ===== LED ===== //
+    // led <r> <g> <b> [<brightness>]
+    else if ((list->size() == 4) && eqlsCMD(0, CLI_LED)) {
+        led::setColor(list->get(1).toInt(), list->get(2).toInt(), list->get(3).toInt());
+    }
+
+    // led <#rrggbb> [<brightness>]
+    else if ((list->size() == 2) &&
+             eqlsCMD(0, CLI_LED) && (list->get(1).charAt(0) == HASHSIGN)) {
+        uint8_t c[3];
+        strToColor(list->get(1), c);
+
+        led::setColor(c[0], c[1], c[2]);
     }
 
     // ===== DELAY ===== //

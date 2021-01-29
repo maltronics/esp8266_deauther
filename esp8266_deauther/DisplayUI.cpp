@@ -87,15 +87,10 @@ void DisplayUI::setup() {
             scan.start(SCAN_MODE_SNIFFER, 0, SCAN_MODE_OFF, 0, false, wifi_channel);
             mode = DISPLAY_MODE::PACKETMONITOR;
         });
-
-        addMenuNode(&mainMenu, D_CLOCK, [this]() { // PACKET MONITOR
-            mode = DISPLAY_MODE::CLOCK;
-            display.setFont(ArialMT_Plain_24);
-            display.setTextAlignment(TEXT_ALIGN_CENTER);
-        });
+        addMenuNode(&mainMenu, D_CLOCK, &clockMenu); // CLOCK
 
 #ifdef HIGHLIGHT_LED
-        addMenuNode(&mainMenu, D_LED, [this]() { // LED
+        addMenuNode(&mainMenu, D_LED, [this]() {     // LED
             highlightLED = !highlightLED;
             digitalWrite(HIGHLIGHT_LED, highlightLED);
         });
@@ -446,6 +441,20 @@ void DisplayUI::setup() {
         });
     });
 
+    // CLOCK MENU
+    createMenu(&clockMenu, &mainMenu, [this]() {
+        addMenuNode(&clockMenu, D_CLOCK_DISPLAY, [this]() { // CLOCK
+            mode = DISPLAY_MODE::CLOCK_DISPLAY;
+            display.setFont(ArialMT_Plain_24);
+            display.setTextAlignment(TEXT_ALIGN_CENTER);
+        });
+        addMenuNode(&clockMenu, D_CLOCK_SET, [this]() { // CLOCK SET TIME
+            mode = DISPLAY_MODE::CLOCK;
+            display.setFont(ArialMT_Plain_24);
+            display.setTextAlignment(TEXT_ALIGN_CENTER);
+        });
+    });
+
     // ===================== //
 
     // set current menu to main menu
@@ -523,7 +532,7 @@ void DisplayUI::setupButtons() {
                 else currentMenu->selected = currentMenu->list->size() - 1;
             } else if (mode == DISPLAY_MODE::PACKETMONITOR) { // when in packet monitor, change channel
                 scan.setChannel(wifi_channel + 1);
-            } else if (mode == DISPLAY_MODE::CLOCK) {
+            } else if (mode == DISPLAY_MODE::CLOCK) {         // when in clock, change time
                 setTime(clockHour, clockMinute + 1, clockSecond);
             }
         }
@@ -539,7 +548,7 @@ void DisplayUI::setupButtons() {
                 else currentMenu->selected = currentMenu->list->size() - 1;
             } else if (mode == DISPLAY_MODE::PACKETMONITOR) { // when in packet monitor, change channel
                 scan.setChannel(wifi_channel + 1);
-            } else if (mode == DISPLAY_MODE::CLOCK) {         // when in packet monitor, change channel
+            } else if (mode == DISPLAY_MODE::CLOCK) {         // when in clock, change time
                 setTime(clockHour, clockMinute + 10, clockSecond);
             }
         }
@@ -601,6 +610,7 @@ void DisplayUI::setupButtons() {
                     break;
 
                 case DISPLAY_MODE::CLOCK:
+                case DISPLAY_MODE::CLOCK_DISPLAY:
                     mode = DISPLAY_MODE::MENU;
                     display.setFont(DejaVu_Sans_Mono_12);
                     display.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -662,12 +672,18 @@ void DisplayUI::draw(bool force) {
 
         updatePrefix();
 
-#ifndef RTC_DS3231
-        if (clockTime < currentTime - 1000) {
-            setTime(clockHour, clockMinute++, clockSecond + 1);
+#ifdef RTC_DS3231
+        bool h12;
+        bool PM_time;
+        clockHour   = clock.getHour(h12, PM_time);
+        clockMinute = clock.getMinute();
+        clockSecond = clock.getSecond();
+#else // ifdef RTC_DS3231
+        if (currentTime - clockTime >= 1000) {
+            setTime(clockHour, clockMinute, ++clockSecond);
             clockTime += 1000;
         }
-#endif // ifndef RTC_DS3231
+#endif // ifdef RTC_DS3231
 
         switch (mode) {
             case DISPLAY_MODE::BUTTON_TEST:
@@ -693,6 +709,7 @@ void DisplayUI::draw(bool force) {
                 drawIntro();
                 break;
             case DISPLAY_MODE::CLOCK:
+            case DISPLAY_MODE::CLOCK_DISPLAY:
                 drawClock();
                 break;
             case DISPLAY_MODE::RESETTING:

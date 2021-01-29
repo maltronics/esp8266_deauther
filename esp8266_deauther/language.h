@@ -201,9 +201,8 @@ const char CLI_HELP_COMMENT[] PROGMEM = "// <comments>";
 const char CLI_HELP_SEND_DEAUTH[] PROGMEM = "send deauth <apMac> <stMac> <rason> <channel>";
 const char CLI_HELP_SEND_BEACON[] PROGMEM = "send beacon <mac> <ssid> <ch> [wpa2]";
 const char CLI_HELP_SEND_PROBE[] PROGMEM = "send probe <mac> <ssid> <ch>";
-const char CLI_HELP_LED_A[] PROGMEM = "led <r> <g> <b> [<brightness>]";
-const char CLI_HELP_LED_B[] PROGMEM = "led <#rrggbb> [<brightness>]";
-const char CLI_HELP_LED_ENABLE[] PROGMEM = "led <enable/disable>";
+const char CLI_HELP_LED_A[] PROGMEM = "led <r> <g> <b>";
+const char CLI_HELP_LED_B[] PROGMEM = "led <#rrggbb>";
 const char CLI_HELP_DRAW[] PROGMEM = "draw";
 const char CLI_HELP_SCREEN_ON[] PROGMEM = "screen <on/off>";
 const char CLI_HELP_SCREEN_MODE[] PROGMEM = "screen mode <menu/packetmonitor/buttontest/loading>";
@@ -366,6 +365,8 @@ const char D_SHOW[] PROGMEM = "SELECT";
 const char D_ATTACK[] PROGMEM = "ATTACK";
 const char D_PACKET_MONITOR[] PROGMEM = "PACKET MONITOR";
 const char D_CLOCK[] PROGMEM = "CLOCK";
+const char D_CLOCK_DISPLAY[] PROGMEM = "CLOCK DISPLAY";
+const char D_CLOCK_SET[] PROGMEM = "SET CLOCK";
 
 // SCAN MENU
 const char D_SCAN_APST[] PROGMEM = "SCAN AP + ST";

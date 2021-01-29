@@ -117,9 +117,6 @@ void setup() {
         displayUI.mode = DISPLAY_MODE::INTRO;
     }
 
-    // copy web files to SPIFFS
-    // copyWebFiles(false);
-
     // load everything else
     names.load();
     ssids.load();
@@ -127,9 +124,6 @@ void setup() {
 
     // create scan.json
     scan.setup();
-
-    // set channel
-    setWifiChannel(settings::getWifiSettings().channel);
 
     // dis/enable serial command interface
     if (settings::getCLISettings().enabled) {

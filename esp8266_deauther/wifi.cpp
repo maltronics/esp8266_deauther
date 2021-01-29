@@ -148,7 +148,7 @@ namespace wifi {
         else if (filename.endsWith(str(W_DOT_PDF))) return str(W_XPDF);
         else if (filename.endsWith(str(W_DOT_ZIP))) return str(W_XZIP);
         else if (filename.endsWith(str(W_DOT_JSON))) return str(W_JSON);
-        else return str(W_TXT);
+        return str(W_TXT);
     }
 
     bool handleFileRead(String path) {
@@ -192,9 +192,14 @@ namespace wifi {
         setPath("/web");
         setSSID(settings::getAccessPointSettings().ssid);
         setPassword(settings::getAccessPointSettings().password);
-        setChannel(1);
+        setChannel(settings::getWifiSettings().channel);
         setHidden(settings::getAccessPointSettings().hidden);
         setCaptivePortal(settings::getWebSettings().captive_portal);
+
+        // copy web files to SPIFFS
+        if (settings::getWebSettings().use_spiffs) {
+            copyWebFiles(false);
+        }
 
         // Set mode
         mode = wifi_mode_t::off;
@@ -326,6 +331,12 @@ namespace wifi {
             server.on("/lang/ru.lang", HTTP_GET, []() {
                 sendProgmem(rulang, sizeof(rulang), W_JSON);
             });
+            server.on("/lang/pl.lang", HTTP_GET, []() {
+                sendProgmem(pllang, sizeof(pllang), W_JSON);
+            });
+            server.on("/lang/uk.lang", HTTP_GET, []() {
+                sendProgmem(uklang, sizeof(uklang), W_JSON);
+            });
             server.on("/lang/de.lang", HTTP_GET, []() {
                 sendProgmem(delang, sizeof(delang), W_JSON);
             });
@@ -340,6 +351,9 @@ namespace wifi {
             });
             server.on("/lang/in.lang", HTTP_GET, []() {
                 sendProgmem(inlang, sizeof(inlang), W_JSON);
+            });
+            server.on("/lang/ko.lang", HTTP_GET, []() {
+                sendProgmem(kolang, sizeof(kolang), W_JSON);
             });
             server.on("/lang/ro.lang", HTTP_GET, []() {
                 sendProgmem(rolang, sizeof(rolang), W_JSON);
@@ -371,11 +385,14 @@ namespace wifi {
                 else if (String(settings::getWebSettings().lang) == "fi") sendProgmem(filang, sizeof(filang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "cn") sendProgmem(cnlang, sizeof(cnlang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "ru") sendProgmem(rulang, sizeof(rulang), W_JSON);
+                else if (String(settings::getWebSettings().lang) == "pl") sendProgmem(pllang, sizeof(pllang), W_JSON);
+                else if (String(settings::getWebSettings().lang) == "uk") sendProgmem(uklang, sizeof(uklang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "de") sendProgmem(delang, sizeof(delang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "it") sendProgmem(itlang, sizeof(itlang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "en") sendProgmem(enlang, sizeof(enlang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "fr") sendProgmem(frlang, sizeof(frlang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "in") sendProgmem(inlang, sizeof(inlang), W_JSON);
+                else if (String(settings::getWebSettings().lang) == "ko") sendProgmem(kolang, sizeof(kolang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "ro") sendProgmem(rolang, sizeof(rolang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "da") sendProgmem(dalang, sizeof(dalang), W_JSON);
                 else if (String(settings::getWebSettings().lang) == "ptbr") sendProgmem(ptbrlang, sizeof(ptbrlang), W_JSON);
@@ -401,9 +418,6 @@ namespace wifi {
         server.on("/attack.json", HTTP_GET, []() {
             server.send(200, str(W_JSON), attack.getStatusJSON());
         });
-
-        // aggressively caching static assets
-        server.serveStatic("/js", LittleFS, String(String(ap_settings.path) + "/js").c_str(), "max-age=86400");
 
         // called when the url is not defined here
         // use it to load content from SPIFFS
